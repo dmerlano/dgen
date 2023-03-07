@@ -154,9 +154,10 @@ def create_output_schema(pg_conn_string, role, suffix, scenario_list, source_sch
         msg = "Specified source_schema ({source_schema}) does not exist.".format(**inputs)
         raise ValueError(msg)
 
-    scen_suffix = os.path.split(scenario_list[0])[1].split('_')[2].rstrip('.xlsm')
+    scen_suffix = os.path.split(scenario_list[0])[1].split('_')[1].rstrip('.xlsm')
 
-    dest_schema = 'diffusion_results_{}'.format(suffix+suffix_microsecond+'_'+scen_suffix)
+    #dest_schema = 'diffusion_results_{}'.format(suffix+suffix_microsecond+'_'+scen_suffix)
+    dest_schema = 'diffusion_results_{}'.format(suffix_microsecond+'_'+scen_suffix)
     inputs['dest_schema'] = dest_schema
 
     sql = '''SELECT diffusion_shared.clone_schema('{source_schema}', '{dest_schema}', '{role}', {include_data});'''.format(**inputs)

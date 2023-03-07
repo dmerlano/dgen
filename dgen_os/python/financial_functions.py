@@ -83,7 +83,7 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
             'batt_ac_or_dc': 0,  # dc-connected
             'desired_power': desired_power,
             'desired_capacity': desired_size,
-            'desired_voltage': 500,
+            'desired_voltage': 50,
             'size_by_ac_not_dc': 0,  # dc-connected
             'inverter_eff': batt.Battery.inverter_efficiency
             # 'batt_dc_dc_efficiency': (optional)
@@ -96,7 +96,8 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
             batt_inputs['LeadAcid_qn'] = 58.12
             # batt_inputs['LeadAcid_tn']: (optional)
 
-        batt_outputs = batt_tools.size_li_ion_battery(batt_inputs)
+        #batt_outputs = batt_tools.size_li_ion_battery(batt_inputs)#size_li_ion_deprecated
+        batt_outputs = batt_tools.calculate_battery_size(batt_inputs)
 
         computed_size = batt_outputs['batt_computed_bank_capacity']
         computed_power = batt_outputs['batt_power_discharge_max_kwdc']
@@ -594,7 +595,7 @@ def calc_system_size_and_performance(agent, sectors, rate_switch_table=None):
     ###----- TAX CREDIT INCENTIVES ----###
     ######################################
     
-    loan.TaxCreditIncentives.itc_fed_percent = agent.loc['itc_fraction_of_capex'] * 100
+    loan.TaxCreditIncentives.itc_fed_percent = agent.loc[['itc_fraction_of_capex']] * 100
 
     ######################################
     ###----------- CASHLOAN -----------###
@@ -604,7 +605,7 @@ def calc_system_size_and_performance(agent, sectors, rate_switch_table=None):
     loan.BatterySystem.batt_replacement_option = 2 # user schedule
     
     batt_replacement_schedule = [0 for i in range(0, agent.loc['batt_lifetime_yrs'] - 1)] + [1]
-    loan.BatterySystem.batt_replacement_schedule = batt_replacement_schedule
+    loan.BatterySystem.batt_replacement_schedule_percent = batt_replacement_schedule
     
     
     ######################################

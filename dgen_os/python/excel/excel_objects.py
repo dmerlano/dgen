@@ -189,21 +189,23 @@ class FancyNamedRange(object):
         
     def to_postgres(self, connection, cursor, schema, table, transpose = False, columns = None, create = False, overwrite = True):
         sql_dict = {'schema': schema, 'table': table }
-        
+   
         if create == True:
             raise NotImplementedError('Creation of a new postgres table is not implemented')
         
-        s = self.to_stringIO(transpose, columns)        
+        s = self.to_stringIO(transpose, columns)
 
-        connection.commit()           
+        connection.commit()
+        
         if overwrite == True:
             sql = 'DELETE FROM {}.{};'.format(schema, table)
             cursor.execute(sql)
             connection.commit()
- 
+
         sql = '{}.{}'.format(schema, table)
-        cursor.copy_from(s, sql, sep = ',', null = '')
-        connection.commit()    
+        #cursor.copy_from(s, sql, sep = ',', null = '') ##deprecated
+        cursor.copy_expert("COPY {} FROM STDIN DELIMITER as ','".format(sql), s, size=8192)
+        connection.commit()
         
         # release the string io object
         s.close()      

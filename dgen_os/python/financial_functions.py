@@ -25,9 +25,8 @@ logger = utilfunc.get_logger()
 
 
 #%%
-def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_switch_table, en_batt=True, batt_simple_dispatch=0, batt_annual_energy_kwh=0):
+def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_switch_table, en_batt=True, batt_simple_dispatch=0):
     """
-    args = (pv, utilityrate, loan, batt, system_costs, agent, rate_switch_table, True, 0,batt_annual_energy_kwh)
     Executes Battwatts, Utilityrate5, and Cashloan PySAM modules with system sizes (kw) as input
     Parameters
     ----------
@@ -48,6 +47,8 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
     -------
     -loan.Outputs.npv: the negative net present value of system + storage to be optimized for system sizing
     """
+
+    print(kw)
 
     inv_eff = 0.96  # default SAM inverter efficiency for PV
     gen_hourly = pv['generation_hourly']
@@ -82,8 +83,8 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
             'batt_Vnom_default': 3.6, # default SAM value
             'batt_ac_or_dc': 0,  # dc-connected
             'desired_power': desired_power,
-            'desired_capacity': desired_size,
-            'desired_voltage': 50,
+            'desired_capacity': 10,
+            'desired_voltage': 500,
             'size_by_ac_not_dc': 0,  # dc-connected
             'inverter_eff': batt.Battery.inverter_efficiency
             # 'batt_dc_dc_efficiency': (optional)
@@ -243,14 +244,17 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
     loan.SystemCosts.total_installed_cost = direct_costs + linear_constant + sales_tax + one_time_charge
     
     # missing params 
-    loan.LCOS.batt_annual_discharge_energy = [batt_annual_energy_kwh]
-    loan.LCOS.batt_annual_charge_energy = [batt_annual_energy_kwh]
-    loan.LCOS.batt_annual_charge_from_system = [batt_annual_energy_kwh]
+    loan.LCOS.batt_annual_discharge_energy = [0]
+    loan.LCOS.batt_annual_charge_energy = [0]
+    loan.LCOS.batt_annual_charge_from_system = [0]
     loan.LCOS.grid_to_batt = [kw]
     loan.LCOS.monthly_grid_to_batt = [0]
     loan.LCOS.monthly_grid_to_load = [0]
+    loan.LCOS.monthly_system_to_grid = [0]
     loan.ChargesByMonth.true_up_credits_ym = [[0]]
-    loan.Battery.batt_capacity_percent = [(loan.SystemCosts.om_capacity / loan.SystemCosts.om_batt_nameplate)*100] 
+    loan.Battery.batt_capacity_percent = [85] 
+    loan.LCOS.year1_monthly_electricity_to_grid = [0]
+    loan.LCOS.charge_w_sys_ec_ym = [[0]]
 
     # Execute financial module 
     loan.execute()
@@ -650,23 +654,17 @@ def calc_system_size_and_performance(agent, sectors, rate_switch_table=None):
     # Calculate the PV system size that maximizes the agent's NPV, to a tolerance of 0.5 kW. 
     # Note that the optimization is technically minimizing negative NPV
     # ! As is, because of the tolerance this function would not necessarily return a system size of 0 or max PV size if those are optimal
-    #res_with_batt = optimize.minimize_scalar(calc_system_performance,
-    #                                         args = (pv, utilityrate, loan, batt, system_costs, agent, rate_switch_table, True, 0,batt_annual_energy_kwh),
-    #                                         bounds = (0, max_system_kw),
-    #                                         method = 'bounded',
-    #                                         options={'xatol':tol})
-    #                                         #tol = tol)
+    res_with_batt = optimize.minimize_scalar(calc_system_performance,
+                                             args = (pv, utilityrate, loan, batt, system_costs, agent, rate_switch_table, True, 0),
+                                             bounds = (0, max_system_kw),
+                                             method = 'bounded',
+                                             options={'xatol':tol})
+                                             #tol = tol)
 
     # PySAM Module outputs with battery
     batt_loan_outputs = loan.Outputs.export()
     batt_util_outputs = utilityrate.Outputs.export()
     batt_annual_energy_kwh = np.sum(utilityrate.SystemOutput.gen)
-    res_with_batt = optimize.minimize_scalar(calc_system_performance,
-                                             args = (pv, utilityrate, loan, batt, system_costs, agent, rate_switch_table, True, 0,batt_annual_energy_kwh),
-                                             bounds = (0, max_system_kw),
-                                             method = 'bounded',
-                                             options={'xatol':tol})
-                                             #tol = tol)
 
     batt_kw = batt.Battery.batt_simple_kw
     batt_kwh = batt.Battery.batt_simple_kwh

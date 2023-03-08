@@ -48,7 +48,7 @@ def calc_system_performance(kw, pv, utilityrate, loan, batt, costs, agent, rate_
     -loan.Outputs.npv: the negative net present value of system + storage to be optimized for system sizing
     """
 
-    print(kw)
+    #print(kw)
 
     inv_eff = 0.96  # default SAM inverter efficiency for PV
     gen_hourly = pv['generation_hourly']

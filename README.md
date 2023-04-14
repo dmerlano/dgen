@@ -146,7 +146,7 @@ Notes:
 - Spyder isn't necessary to use. If you'd rather run dGen by launching python from the dg3n environment then by all means do so.
 
 ### E: Configure Scenario
-1. Open the blank input sheet located in ```dgen_os/excel/input_sheet_v_beta.xlsm ``` (don't forget to enable macros!). This file defines most of the settings for a scenario. Configure it depending on the desired model run and save a copy in the input_scenarios folder, i.e. ```dgen_os/input_scenarios/my_scenario.xlsm```. 
+1. Open the blank input sheet located in ```dgen_os/excel/input_sheet_v_beta.xlsm ``` (don't forget to enable macros!). This file defines most of the settings for a scenario. Configure it depending on the desired model run and save a copy in the input_scenarios folder, i.e. ```dgen_os/input_scenarios/my_scenario.xlsm``` (DO NOT DEVIATE FROM THIS NAMING CONVENTION, <string>_<string>.xlsm). 
 
 See the Input Sheet [Wiki page](https://github.com/NREL/dgen/wiki) for more details on customizing scenarios. 
 
